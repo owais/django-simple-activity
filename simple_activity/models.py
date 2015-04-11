@@ -1,22 +1,21 @@
 from django.db import models
-from django.conf import settings
 from django.utils.timezone import now
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 
 from filtered_contenttypes.fields import FilteredGenericForeignKey
 from django_pgjson.fields import JsonBField
 
 from .managers import ActionManager
+from . import settings as app_settings
 from . import registry
-from . import settings
 
 
 def _default_action_meta():
     return {}
 
 
-class BaseAction(models.Model):
+class Action(models.Model):
     item_type = models.ForeignKey(ContentType, related_name='actions')
     item_id = models.PositiveIntegerField()
     item = FilteredGenericForeignKey('item_type', 'item_id')
@@ -26,15 +25,17 @@ class BaseAction(models.Model):
     target_id = models.PositiveIntegerField(blank=True, null=True)
     target = FilteredGenericForeignKey('target_type', 'target_id')
 
-    actor = models.ForeignKey('users.User', related_name='activity')
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='activity')
     verb = models.CharField(max_length=23,
                             choices=registry.as_model_choices())
     published = models.DateTimeField(auto_now_add=True)
 
     meta = JsonBField(default=_default_action_meta, blank=True)
 
+    objects = ActionManager()
+
     class Meta:
-        abstract = True
+        abstract = app_settings.get('ACTION_MODEL') != 'simple_activity.Action'
         ordering = ('-published',)
 
     @classmethod
@@ -52,23 +53,3 @@ class BaseAction(models.Model):
     @property
     def verb_object(self):
         return registry.get_from_code(self.verb)
-
-
-class Action(BaseAction):
-    CLIENTS = 1
-    VENDORS = 2
-    ALL = 3
-    visibility_choices = (
-        (CLIENTS, 'Client'),
-        (VENDORS, 'Vendors'),
-        (ALL, 'Both vendors and client'),
-    )
-
-    visibility = models.PositiveIntegerField(
-        default=ALL, choices=visibility_choices)
-
-    objects = ActionManager()
-
-    class Meta:
-        abstract = settings.get('ACTION_MODEL') != 'simple_activity.Action'
-        ordering = ('-published',)

@@ -13,7 +13,7 @@ Simple Activity ships with a `Action` model that can be used directly.
 
 In `custom_app/models.py`
 ```
-from simple_activity.models import BaseAction
+from simple_activity.models import Action as BaseAction
 
 class Action(BaseAction):
    # your custom fields, managers, etc here
