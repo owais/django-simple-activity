@@ -1,0 +1,2 @@
+djorm-ext-filtered-contenttypes==0.2
+django-pgjson==0.2.3
