@@ -11,7 +11,7 @@ Simple Activity ships with a `Action` model that can be used directly.
 
 
 
-### Setting up custom Action model
+#### Setting up custom Action model
 
 In `custom_app/models.py`
 ```
