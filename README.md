@@ -1,7 +1,5 @@
 # django-simple-activity
 
-## settings
-
 ### Models
 
 Simple Activity ships with a `Action` model that can be used directly.
